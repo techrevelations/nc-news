@@ -42,7 +42,6 @@ describe('/api', () => {
 				request.get('/api/topics/coding/articles').expect(200));
 			it('GET returns status 404 responds with error message: route does not exist', () =>
 				request.get('/api/topics/bitcoin/articles').expect(404).then(({ body }) => {
-					//console.log(body);
 					expect(body.message).to.equal('topic does not exist');
 				}));
 			it('GET returns status 200 responds with limited number of results', () =>
@@ -72,13 +71,23 @@ describe('/api', () => {
 		});
 		it('POST returns 201 responds with a posted article', () => {
 			const newArticlePost = {
-				title: 'Drop Database',
-				body: 'How to hack anything',
+				title: 'dieting for dummies',
+				body: 'how to survive on only jelly, how to remove the wobble',
 				username: 'jessjelly'
 			};
-			return request.post('/api/topics/: coding/articles').send(newArticlePost).expect(201).then(({ body }) => {
-				//console.log(body);
-				expect(body.coding.articles).to.have.keys('title', 'body');
+			return request.post('/api/topics/coding/articles').send(newArticlePost).expect(201).then(({ body }) => {
+				console.log(body);
+				expect(body.articles).to.have.keys(
+					'article_id',
+					'title',
+					'body',
+					'votes',
+					'topic',
+					'username',
+					'created_at'
+				);
+				expect(body.articles.topic).to.equal('coding');
+				expect(body.articles.body).to.equal('how to survive on only jelly, how to remove the wobble');
 			});
 		});
 	});
