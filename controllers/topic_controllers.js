@@ -14,9 +14,7 @@ exports.getAllTopics = (req, res, next) => {
 
 exports.getAllArticlesByTopic = (req, res, next) => {
 	const validSortCriteria = [ 'votes', 'created_at', 'topic', 'comment_count', 'username' ];
-
 	const { p = 0, limit = 10, sort_by = 'articles.created_at', order = 'desc' } = req.query;
-
 	const sort = validSortCriteria.includes(sort_by) ? sort_by : 'articles.created_at';
 	const offset = p === 0 ? 0 : (p - 1) * limit;
 

@@ -42,6 +42,7 @@ describe('/api', () => {
 				request.get('/api/topics/coding/articles').expect(200));
 			it('GET returns status 404 responds with error message: route does not exist', () =>
 				request.get('/api/topics/bitcoin/articles').expect(404).then(({ body }) => {
+					//console.log(body);
 					expect(body.message).to.equal('topic does not exist');
 				}));
 			it('GET returns status 200 responds with limited number of results', () =>
@@ -73,22 +74,20 @@ describe('/api', () => {
 			const newArticlePost = {
 				title: 'Drop Database',
 				body: 'How to hack anything',
-				username: 'someone'
+				username: 'jessjelly'
 			};
 			return request.post('/api/topics/: coding/articles').send(newArticlePost).expect(201).then(({ body }) => {
-				console.log(body);
-				// expect(body.topic).to.have.keys('slug', 'description');
-				// expect(body.topic.slug).to.equal('Drop Database');
-				// expect(body.topic.description).to.equal('How to hack anything');
+				//console.log(body);
+				expect(body.coding.articles).to.have.keys('title', 'body');
 			});
 		});
 	});
 });
 
-//it('PATCH status 405 handles invalid requests', () => {
-//return request.patch('/api/topics').expect(405);
-//})
+// it('PATCH status 405 handles invalid requests', () => {
+// return request.patch('/api/topics').expect(405);
+// })
 
-//'invalidmethods status 405 handles invalid requests, ()=> {const invlaidMethods.map(invalidMethods = ['patch, 'put', 'delete']
-//const invalidRequests = invalidmethods.map(invalidMethod => request[invalidMethod](partyUrl).expect(405))
-//return Promise.all(invalidRequests))}
+// 'invalidmethods status 405 handles invalid requests, ()=> {const invlaidMethods.map(invalidMethods = ['patch, 'put', 'delete']
+// const invalidRequests = invalidmethods.map(invalidMethod => request[invalidMethod](partyUrl).expect(405))
+// return Promise.all(invalidRequests))}
