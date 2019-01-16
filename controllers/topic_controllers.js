@@ -13,7 +13,13 @@ exports.getAllTopics = (req, res, next) => {
 };
 
 exports.getAllArticlesByTopic = (req, res, next) => {
-	const { p = 0, limit = 10, sort_by = 'articles.created_at' } = req.query;
+	const validSortCriteria = [ 'votes', 'created_at', 'topic', 'comment_count', 'username' ];
+
+	const { p = 0, limit = 10, sort_by = 'articles.created_at', order = 'desc' } = req.query;
+
+	const sort = validSortCriteria.includes(sort_by) ? sort_by : 'articles.created_at';
+	const offset = p === 0 ? 0 : (p - 1) * limit;
+
 	const { topic } = req.params;
 	const articleQuery = connection
 		.select('articles.username', 'title', 'articles.article_id', 'articles.votes', 'articles.created_at', 'topic')
@@ -21,11 +27,10 @@ exports.getAllArticlesByTopic = (req, res, next) => {
 		.where('topic', topic)
 		.leftJoin('comments', 'comments.article_id', 'articles.article_id')
 		.limit(limit)
-		.count('comments.comment_id as comment_count')
+		.offset(offset)
+		.count('comments.comment_id as comment_count') // can be writtten as ({comment_count: 'comments.comment_id'})
 		.groupBy('articles.article_id', 'articles.username')
-		.orderBy(sort_by)
-		.offset(p);
-	//.map(article);
+		.orderBy(sort, order);
 
 	const topicQuery = connection.select('*').from('topics').where('slug', topic);
 	Promise.all([ articleQuery, topicQuery ])
@@ -36,12 +41,16 @@ exports.getAllArticlesByTopic = (req, res, next) => {
 		.catch(next);
 };
 
-// exports.postTopic = (req, res, next) => {
-// 	connection
-// 		.one(
-// 			req.body
-// 		)
-// 		.then((//WHAT GOES HERE) => {
-// 			res.status(201).json({//GOES HERE});
-// 		})
-// 		.catch(next);
+exports.postTopic = (req, res, next) => {
+	connection('topics')
+		.insert(req.body)
+		.returning('*')
+		.then(([ topic ]) => {
+			res.status(201).send({ topic });
+		})
+		.catch(next);
+};
+
+exports.postArticle = (req, res, next) => {
+	connection('topics');
+};
