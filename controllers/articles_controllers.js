@@ -48,5 +48,25 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.patchArticleById = (req, res, next) => {
-	console.log(req.body);
+	const { article_id } = req.params;
+	const votes = req.body.inc_votes;
+	connection
+		.select(
+			'articles.article_id',
+			'articles.username as author',
+			'articles.title',
+			'articles.body',
+			'articles.votes',
+			'articles.created_at',
+			'articles.topic'
+		)
+		.from('articles')
+		.where('articles.article_id', article_id)
+		.groupBy('articles.article_id', 'articles.title')
+		.leftJoin('comments', 'comments.article_id', 'articles.article_id')
+		.count('comments.comment_id as comment_count')
+		.increment('votes', votes)
+		.returning('*')
+		.then((article) => res.status(200).send({ article }))
+		.catch(next);
 };

@@ -142,6 +142,18 @@ describe('/api', () => {
 					expect(body.article[0].votes).to.equal(10);
 				});
 			});
+			it('DELETE returns status 204 responds with no content', () => {
+				return request
+					.delete('/api/mps/3')
+					.expect(204)
+					.then(({ body }) => {
+						expect(body).to.equal({});
+						return connection('mps').where('mp_id', 3);
+					})
+					.then(([ mp ]) => {
+						expect(mp).to.equal(undefined);
+					});
+			});
 		});
 	});
 });
