@@ -70,3 +70,77 @@ exports.patchArticleById = (req, res, next) => {
 		.then((article) => res.status(200).send({ article }))
 		.catch(next);
 };
+
+exports.deleteArticleById = (req, res, next) => {
+	const { article_id } = req.params;
+	connection
+		.select(
+			'articles.article_id',
+			'articles.username as author',
+			'articles.title',
+			'articles.body',
+			'articles.votes',
+			'articles.created_at',
+			'articles.topic'
+		)
+		.from('articles')
+		.where('articles.article_id', article_id)
+		.leftJoin('comments', 'comments.article_id', 'articles.article_id')
+		.count('comments.comment_id as comment_count')
+		.del()
+		.then(() => res.status(204).send({}))
+		.catch(next);
+};
+
+exports.getCommentsByArticleId = (req, res, next) => {
+	const validSortCriteria = [ 'votes', 'created_at', 'comment_id', 'body', 'author' ];
+	const { p = 0, limit = 10, sort_by = 'created_at', order = 'desc' } = req.query;
+	const sort = validSortCriteria.includes(sort_by) ? sort_by : 'created_at';
+	const offset = p === 0 ? 0 : (p - 1) * limit;
+	const { article_id } = req.params;
+	connection
+		.select('comment_id', 'username as author', 'body', 'votes', 'created_at')
+		.from('comments')
+		.where('comments.article_id', article_id)
+		.limit(limit)
+		.offset(offset)
+		.orderBy(sort, order)
+		.then((comments) => res.status(200).send({ comments }))
+		.catch(next);
+};
+
+exports.postCommentToArticle = (req, res, next) => {
+	const { article_id } = req.params;
+	const newComment = { article_id, ...req.body };
+	connection('comments')
+		.insert(newComment)
+		.where('article_id', article_id)
+		.returning('*')
+		.then(([ comment ]) => {
+			// if (!articles) return Promise.reject({ status: 404, message: 'topic does not exist' });
+			// console.log(articles);
+			res.status(201).send({ comment });
+		})
+		.catch(next);
+};
+
+exports.patchCommentById = (req, res, next) => {
+	const { article_id, comment_id } = req.params;
+	console.log(comment_id);
+	const votes = req.body.inc_votes;
+	connection
+		.select('*')
+		//'comment_id', 'username as author', 'body', 'votes', 'created_at')
+		.from('comments')
+		.limit(10)
+		//.where('comments.comment_id', comment_id)
+		.leftJoin('articles', 'articles.article_id', 'comments.article_id')
+		// .where({ comment_id: req.params.comment_id, article_id: req.params.article_id })
+		//.increment('comments.votes', votes)
+		.returning('*')
+		// if (article.length === 0) return Promise.reject()
+		.then((article) => res.status(200).send({ article }))
+		.catch(next);
+};
+
+exports.deleteComment = (req, res, next) => {};

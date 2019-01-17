@@ -142,17 +142,85 @@ describe('/api', () => {
 					expect(body.article[0].votes).to.equal(10);
 				});
 			});
-			it('DELETE returns status 204 responds with no content', () => {
-				return request
-					.delete('/api/mps/3')
+			it('DELETE returns status 204 responds with no content', () =>
+				request
+					.delete('/api/articles/3')
 					.expect(204)
 					.then(({ body }) => {
-						expect(body).to.equal({});
-						return connection('mps').where('mp_id', 3);
+						expect(body).to.eql({});
+						return connection('articles').where('article_id', 3);
 					})
-					.then(([ mp ]) => {
-						expect(mp).to.equal(undefined);
+					.then(([ article ]) => {
+						expect(article).to.equal(undefined);
+					}));
+			describe('/comments', () => {
+				it('GET returns status 200 responds with comments matching an article_id', () =>
+					request.get('/api/articles/1/comments').expect(200).then(({ body }) => {
+						expect(body.comments.length).to.equal(8);
+						expect(body.comments[0]).to.have.keys('comment_id', 'votes', 'created_at', 'author', 'body');
+					}));
+				it('POST returns 201 responds with a posted comment', () => {
+					const newCommentPost = {
+						username: 'cooljmessy',
+						body: 'pretty dope dude!'
+					};
+					return request
+						.post('/api/articles/2/comments')
+						.send(newCommentPost)
+						.expect(201)
+						.then(({ body }) => {
+							expect(body.comment.body).to.equal('pretty dope dude!');
+							expect(body.comment.article_id).to.equal(2);
+						});
+				});
+				describe('/:comment_id', () => {
+					it('PATCH returns status 200 responds with an ammended comment', () => {
+						const commentPatch = {
+							inc_votes: 2
+						};
+						return request
+							.patch('/api/articles/18/comments/1')
+							.send(commentPatch)
+							.expect(200)
+							.then(({ body }) => {
+								console.log(body);
+								expect(body.article[0].votes).to.equal(5);
+							});
 					});
+					// it('DELETE returns status 204 responds with no content', () => {	request
+					// 	.delete('/api/articles/3/comments/1')
+					// 	.expect(204)
+					// 	.then(({ body }) => {
+					// 		expect(body).to.eql({});
+					// 		return connection('articles').where('article_id', 3);
+					// 	})
+					// 	.then(([ article ]) => {
+					// 		expect(article).to.equal(undefined);
+					// 	}));})
+				});
+
+				// it('does this', () => {
+				// 	request.get('/api/articles/5/comments').expect(200).then(({ body }) => {
+				// 		console.log(body);
+				// 	});
+				// });
+			});
+		});
+	});
+	describe('/users', () => {
+		it('GET returns status 200 responds with a list of all users', () => {
+			return request.get('/api/users').expect(200).then(({ body }) => {
+				expect(body.users.length).to.equal(6);
+				expect(body.users[2].name).to.equal('Amy Happy');
+				expect(body.users[0]).to.have.keys('username', 'avatar_url', 'name');
+			});
+		});
+		describe('/:username', () => {
+			it('GET returns status 200 responds with a single user', () => {
+				return request.get('/api/users/cooljmessy').expect(200).then(({ body }) => {
+					expect(body.users.length).to.equal(1);
+					expect(body.users[0].avatar_url).to.equal('https://i.imgur.com/WfX0Neu.jpg');
+				});
 			});
 		});
 	});
