@@ -1,6 +1,7 @@
 exports.handle404 = (err, req, res, next) => {
-  const errCodes404 = [];
-  if (err.status === 404 || errCodes404.includes(err.code)) res.status(404).send({ message: err.message });
+  const errCodes404 = ['23503'];
+  console.log(err.message);
+  if (err.status === 404 || errCodes404.includes(err.code)) res.status(404).send({ message: err.message || 'parameter does not exist' });
   else next(err);
 };
 

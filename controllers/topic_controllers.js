@@ -13,7 +13,7 @@ exports.getAllTopics = (req, res, next) => {
 };
 
 exports.getAllArticlesByTopic = (req, res, next) => {
-  const validSortCriteria = ['votes', 'created_at', 'topic', 'comment_count', 'username'];
+  const validSortCriteria = ['votes', 'created_at', 'topic', 'comment_count', 'author'];
   const {
     p = 0, limit = 10, sort_by = 'articles.created_at', order = 'desc',
   } = req.query;
@@ -22,7 +22,14 @@ exports.getAllArticlesByTopic = (req, res, next) => {
 
   const { topic } = req.params;
   const articleQuery = connection
-    .select('articles.username', 'title', 'articles.article_id', 'articles.votes', 'articles.created_at', 'topic')
+    .select(
+      'articles.username as author',
+      'title',
+      'articles.article_id',
+      'articles.votes',
+      'articles.created_at',
+      'topic',
+    )
     .from('articles')
     .where('topic', topic)
     .leftJoin('comments', 'comments.article_id', 'articles.article_id')
@@ -32,6 +39,7 @@ exports.getAllArticlesByTopic = (req, res, next) => {
     .groupBy('articles.article_id', 'articles.username')
     .orderBy(sort, order);
 
+  // console.log(articleQuery);
   const topicQuery = connection.select('*').from('topics').where('slug', topic);
   Promise.all([articleQuery, topicQuery])
     .then(([articles, topics]) => {
@@ -59,6 +67,8 @@ exports.postArticle = (req, res, next) => {
     .returning('*')
     .where('topic', topic)
     .then(([articles]) => {
+      if (!articles) return Promise.reject({ status: 404, message: 'topic does not exist' });
+      // console.log(articles);
       res.status(201).send({ articles });
     })
     .catch(next);

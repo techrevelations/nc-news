@@ -76,7 +76,7 @@ describe('/api', () => {
 				username: 'jessjelly'
 			};
 			return request.post('/api/topics/coding/articles').send(newArticlePost).expect(201).then(({ body }) => {
-				console.log(body);
+				// console.log(body);
 				expect(body.articles).to.have.keys(
 					'article_id',
 					'title',
@@ -88,6 +88,59 @@ describe('/api', () => {
 				);
 				expect(body.articles.topic).to.equal('coding');
 				expect(body.articles.body).to.equal('how to survive on only jelly, how to remove the wobble');
+			});
+		});
+		it('POST returns 404 responds with an error if no topic for article is found', () => {
+			const newArticlePost = {
+				title: 'dieting for dummies',
+				body: 'how to survive on only jelly, how to remove the wobble',
+				username: 'jessjelly'
+			};
+			return request.post('/api/topics/no_topic/articles').send(newArticlePost).expect(404).then(({ body }) => {
+				expect(body.message).to.equal(
+					'insert into "articles" ("body", "title", "topic", "username") values ($1, $2, $3, $4) returning * - insert or update on table "articles" violates foreign key constraint "articles_topic_foreign"'
+				);
+			});
+		});
+	});
+	describe('/articles', () => {
+		it('GET returns status 200 responds with all articles', () =>
+			request.get('/api/articles').expect(200).then(({ body }) => {
+				expect(body.articles.length).to.equal(10);
+				expect(body.articles[0].title).to.equal('Seafood substitutions are increasing');
+				expect(body.articles[0]).to.have.keys(
+					'author',
+					'title',
+					'article_id',
+					'body',
+					'votes',
+					'comment_count',
+					'created_at',
+					'topic'
+				);
+			}));
+		it('GET returns status 200 responds with asorted data by author', () =>
+			request.get('/api/articles?sort_by=author').expect(200).then(({ body }) => {
+				expect(body.articles[0].author).to.equal('weegembump');
+				expect(body.articles[9].author).to.equal('tickle122');
+			}));
+		it('GET returns status 200 responds with an ordered set of results', () =>
+			request.get('/api/articles/?order=asc').expect(200).then(({ body }) => {
+				expect(body.articles[0].author).to.equal('cooljmessy');
+				expect(body.articles[9].author).to.equal('cooljmessy');
+			}));
+		describe('/:article_id', () => {
+			it('GET returns status 200 responds with an article matching params', () =>
+				request.get('/api/articles/35').expect(200).then(({ body }) => {
+					expect(body.article[0].article_id).to.equal(35);
+				}));
+			it('PATCH returns status 200 responds with an ammended article', () => {
+				const articlePatch = {
+					inc_votes: 10
+				};
+				return request.patch('/api/articles/35').send(articlePatch).expect(200).then(({ body }) => {
+					expect(body.article[0].votes).to.equal(10);
+				});
 			});
 		});
 	});
