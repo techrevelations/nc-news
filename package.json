@@ -9,10 +9,14 @@
 		"migrate:rollback": "knex migrate:rollback",
 		"seed": "npm run migrate:rollback && npm run migrate:latest && knex seed:run",
 		"test": "psql -f ./db/data/test-setup.sql && mocha ./spec/",
+		"seed:prod": "DB_URL=$(heroku config:get DATABASE_URL) knex seed:run --env production",
+		"migrate:latest:prod": "DB_URL=$(heroku config:get DATABASE_URL) knex migrate:latest --env production",
+		"migrate:rollback:prod": "DB_URL=$(heroku config:get DATABASE_URL) knex migrate:rollback --env production",
 		"lint": "eslint ./",
 		"pre-commit": "npm t",
 		"posttest": "npm run lint",
-		"lint:fix": "eslint --fix ./"
+		"lint:fix": "eslint --fix ./",
+		"start": "node listen.js"
 	},
 	"repository": {
 		"type": "git",

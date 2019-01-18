@@ -176,52 +176,52 @@ describe('/api', () => {
 				describe('/:comment_id', () => {
 					it('PATCH returns status 200 responds with an ammended comment', () => {
 						const commentPatch = {
-							inc_votes: 2
+							inc_votes: 5
 						};
 						return request
 							.patch('/api/articles/18/comments/1')
 							.send(commentPatch)
 							.expect(200)
 							.then(({ body }) => {
-								console.log(body);
-								expect(body.article[0].votes).to.equal(5);
+								expect(body.article[0].votes).to.equal(4);
+								expect(body.article.length).to.equal(1);
 							});
 					});
-					// it('DELETE returns status 204 responds with no content', () => {	request
-					// 	.delete('/api/articles/3/comments/1')
-					// 	.expect(204)
-					// 	.then(({ body }) => {
-					// 		expect(body).to.eql({});
-					// 		return connection('articles').where('article_id', 3);
-					// 	})
-					// 	.then(([ article ]) => {
-					// 		expect(article).to.equal(undefined);
-					// 	}));})
+					it('DELETE returns status 204 responds with no content', () => {
+						request
+							.delete('/api/articles/18/comments/1')
+							.expect(204)
+							.then(({ body }) => {
+								expect(body).to.eql({});
+								return connection('comments').where('comment_id', 1);
+							})
+							.then(([ comment ]) => {
+								expect(comment).to.equal(undefined);
+							});
+					});
 				});
-
-				// it('does this', () => {
-				// 	request.get('/api/articles/5/comments').expect(200).then(({ body }) => {
-				// 		console.log(body);
-				// 	});
-				// });
 			});
 		});
 	});
 	describe('/users', () => {
-		it('GET returns status 200 responds with a list of all users', () => {
-			return request.get('/api/users').expect(200).then(({ body }) => {
+		it('GET returns status 200 responds with a list of all users', () =>
+			request.get('/api/users').expect(200).then(({ body }) => {
 				expect(body.users.length).to.equal(6);
 				expect(body.users[2].name).to.equal('Amy Happy');
 				expect(body.users[0]).to.have.keys('username', 'avatar_url', 'name');
-			});
-		});
+			}));
 		describe('/:username', () => {
-			it('GET returns status 200 responds with a single user', () => {
-				return request.get('/api/users/cooljmessy').expect(200).then(({ body }) => {
+			it('GET returns status 200 responds with a single user', () =>
+				request.get('/api/users/cooljmessy').expect(200).then(({ body }) => {
 					expect(body.users.length).to.equal(1);
 					expect(body.users[0].avatar_url).to.equal('https://i.imgur.com/WfX0Neu.jpg');
-				});
-			});
+				}));
+		});
+	});
+	it.only('GET returns status 200 responds with a json object of all endpoints', () => {
+		request.get('/api').expect(200).then(({ body }) => {
+			console.log(body);
+			expect(body.users.length).to.equal(1);
 		});
 	});
 });
@@ -230,6 +230,10 @@ describe('/api', () => {
 // return request.patch('/api/topics').expect(405);
 // })
 
-// 'invalidmethods status 405 handles invalid requests, ()=> {const invlaidMethods.map(invalidMethods = ['patch, 'put', 'delete']
+// 'invalidmethods status 405 handles invalid requests', () => { const invlaidMethods.map(invalidMethods = ['patch, 'put', 'delete'])
 // const invalidRequests = invalidmethods.map(invalidMethod => request[invalidMethod](partyUrl).expect(405))
 // return Promise.all(invalidRequests))}
+
+// getallendpoints send JSON
+// handle400 and other error codes
+// tests for error codes

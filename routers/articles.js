@@ -1,13 +1,13 @@
 const router = require('express').Router();
 const {
-	getAllArticles,
-	getArticleById,
-	patchArticleById,
-	deleteArticleById,
-	getCommentsByArticleId,
-	postCommentToArticle,
-	patchCommentById,
-	deleteComment
+  getAllArticles,
+  getArticleById,
+  patchArticleById,
+  deleteArticleById,
+  getCommentsByArticleId,
+  postCommentToArticle,
+  patchCommentById,
+  deleteComment,
 } = require('../controllers/articles_controllers');
 const { handle405 } = require('../errors/index');
 
