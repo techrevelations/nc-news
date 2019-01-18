@@ -12,8 +12,8 @@ app.use(handle404);
 app.use(handle422);
 
 app.use((err, req, res, next) => {
-	console.log(err);
-	res.status(500).json({ err });
+  console.log(err);
+  res.status(500).json({ err });
 });
 
 module.exports = app;
