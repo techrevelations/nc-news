@@ -9,6 +9,12 @@ describe('/api', () => {
 
   after(() => connection.destroy());
 
+  it('GET returns status 200 responds with a json object of all endpoints', () => {
+    request.get('/api').expect(200).then(({ body }) => {
+      // console.log(body.endPoints);
+      expect(body).to.have.keys('endPoints');
+    });
+  });
   describe('/topics', () => {
     it('GET returns status 200 responds with all topics', () => request.get('/api/topics').expect(200).then(({ body }) => {
       expect(body.topics.length).to.equal(3);
@@ -34,6 +40,9 @@ describe('/api', () => {
         expect(body.message).to.equal('parameter already exists, duplicates not allowed');
       });
     });
+    it('DELETE returns status 405 responds with an error message', () => request.delete('/api/topics').expect(405).then(({ body }) => {
+      expect(body.message).to.equal('invalid action');
+    }));
     describe('/:topic/articles', () => {
       it('GET returns status 200 responds with articles from a single topic', () => request.get('/api/topics/coding/articles').expect(200));
       it('GET returns status 404 responds with error message: route does not exist', () => request.get('/api/topics/bitcoin/articles').expect(404).then(({ body }) => {
@@ -149,14 +158,10 @@ describe('/api', () => {
             username: 'cooljmessy',
             body: 'pretty dope dude!',
           };
-          return request
-            .post('/api/articles/2/comments')
-            .send(newCommentPost)
-            .expect(201)
-            .then(({ body }) => {
-              expect(body.comment.body).to.equal('pretty dope dude!');
-              expect(body.comment.article_id).to.equal(2);
-            });
+          return request.post('/api/articles/2/comments').send(newCommentPost).expect(201).then(({ body }) => {
+            expect(body.comment.body).to.equal('pretty dope dude!');
+            expect(body.comment.article_id).to.equal(2);
+          });
         });
         describe('/:comment_id', () => {
           it('PATCH returns status 200 responds with an ammended comment', () => {
@@ -199,12 +204,6 @@ describe('/api', () => {
         expect(body.users.length).to.equal(1);
         expect(body.users[0].avatar_url).to.equal('https://i.imgur.com/WfX0Neu.jpg');
       }));
-    });
-  });
-  it('GET returns status 200 responds with a json object of all endpoints', () => {
-    request.get('/api').expect(200).then(({ body }) => {
-      console.log(body);
-      expect(body.users.length).to.equal(1);
     });
   });
 });

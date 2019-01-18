@@ -3,7 +3,7 @@ const topicsRouter = require('../routers/topics');
 const articlesRouter = require('../routers/articles');
 const usersRouter = require('../routers/users');
 const { handle405 } = require('../errors/index');
-const { getAllEndpoints } = require('../controllers/api_controllers');
+const getAllEndpoints = require('../controllers/api_controllers');
 
 router.use('/topics', topicsRouter);
 router.use('/articles', articlesRouter);

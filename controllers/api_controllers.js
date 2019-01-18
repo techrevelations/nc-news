@@ -1,8 +1,6 @@
-// const connection = require('../db/connection');
+const endPoints = require('../db/data/endPoints');
 
-exports.getAllEndpoints = (req, res, next) => {
-  res.status(200).send();
-  // (endPoints.json()).catch(next);
-};
-
-const endPoints = { I: 'here' };
+function getAllEndpoints(req, res, next) {
+  res.status(200).send({ endPoints }).catch(next);
+}
+module.exports = getAllEndpoints;
